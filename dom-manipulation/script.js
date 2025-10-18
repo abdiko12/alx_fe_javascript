@@ -25,7 +25,7 @@ function populateCategories() {
   categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
-    option.textContent = cat;  // Using textContent as required
+    option.textContent = cat;
     filter.appendChild(option);
   });
 
@@ -130,30 +130,47 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// --- Simulated server data ---
-let serverQuotes = [
-  { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
-  { text: "Life is what happens when you're busy making other plans.", category: "Life" },
-  { text: "An investment in knowledge pays the best interest.", category: "Education" },
-];
+// --- Fetch quotes from mock API (JSONPlaceholder) ---
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    if (!response.ok) throw new Error('Network response was not ok');
 
-// --- Simulate server fetch ---
-function fetchQuotesFromServer() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(JSON.parse(JSON.stringify(serverQuotes)));
-    }, 1000);
-  });
+    const data = await response.json();
+
+    // Map data to quotes format {text, category}
+    // Use title as 'text' and assign a dummy category for demo.
+    const fetchedQuotes = data.slice(0, 10).map(post => ({
+      text: post.title,
+      category: 'Imported'
+    }));
+
+    return fetchedQuotes;
+  } catch (error) {
+    console.error('Fetching from server failed:', error);
+    return null;
+  }
 }
 
-// --- Simulate server post ---
-function postQuotesToServer(newQuotes) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      serverQuotes = JSON.parse(JSON.stringify(newQuotes));
-      resolve({ status: "success" });
-    }, 1000);
-  });
+// --- Post quotes to mock API (JSONPlaceholder) ---
+async function postQuotesToServer(newQuotes) {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newQuotes)
+    });
+    if (!response.ok) throw new Error('Network response was not ok');
+
+    const result = await response.json();
+    console.log('Posted quotes to server:', result);
+    return result;
+  } catch (error) {
+    console.error('Posting to server failed:', error);
+    return null;
+  }
 }
 
 // --- UI elements for sync notification ---
@@ -174,6 +191,12 @@ function areQuotesEqual(localQ, serverQ) {
 async function syncQuotes() {
   try {
     const serverData = await fetchQuotesFromServer();
+
+    if (serverData === null) {
+      syncMessage.textContent = "Failed to fetch data from server.";
+      syncNotification.style.display = "block";
+      return;
+    }
 
     if (!areQuotesEqual(quotes, serverData)) {
       quotes = serverData;
@@ -200,10 +223,4 @@ syncNowBtn.addEventListener("click", () => {
 });
 
 // --- Event listeners ---
-document.getElementById("newQuote").addEventListener("click", showRandomQuote);
-
-// --- Initialization ---
-populateCategories();
-showRandomQuote();
-syncQuotes();
-setInterval(syncQuotes, 30000); // Sync every 30 seconds
+document.getElementById("newQuote")
