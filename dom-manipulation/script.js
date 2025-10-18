@@ -173,11 +173,6 @@ async function postQuotesToServer(newQuotes) {
   }
 }
 
-// --- UI elements for sync notification ---
-const syncNotification = document.getElementById("syncNotification");
-const syncMessage = document.getElementById("syncMessage");
-const syncNowBtn = document.getElementById("syncNowBtn");
-
 // --- Compare quotes for equality ---
 function areQuotesEqual(localQ, serverQ) {
   if (localQ.length !== serverQ.length) return false;
@@ -193,8 +188,7 @@ async function syncQuotes() {
     const serverData = await fetchQuotesFromServer();
 
     if (serverData === null) {
-      syncMessage.textContent = "Failed to fetch data from server.";
-      syncNotification.style.display = "block";
+      console.warn("Failed to fetch data from server.");
       return;
     }
 
@@ -204,23 +198,22 @@ async function syncQuotes() {
       populateCategories();
       showRandomQuote();
 
-      syncMessage.textContent = "Data was updated from the server.";
-      syncNotification.style.display = "block";
-    } else {
-      syncNotification.style.display = "none";
+      alert("Data was updated from the server.");
     }
   } catch (error) {
     console.error("Sync failed:", error);
-    syncMessage.textContent = "Failed to sync with server.";
-    syncNotification.style.display = "block";
   }
 }
 
-// --- Sync Now button handler ---
-syncNowBtn.addEventListener("click", () => {
-  syncQuotes();
-  syncNotification.style.display = "none";
-});
-
 // --- Event listeners ---
-document.getElementById("newQuote")
+document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+document.getElementById("categoryFilter").addEventListener("change", filterQuotes);
+document.getElementById("importFile").addEventListener("change", importFromJsonFile);
+document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
+document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
+
+// --- Initialization ---
+populateCategories();
+showRandomQuote();
+syncQuotes();
+setInterval(syncQuotes, 30000); // Sync every 30 seconds
