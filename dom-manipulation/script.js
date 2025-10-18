@@ -198,7 +198,7 @@ async function syncQuotes() {
       populateCategories();
       showRandomQuote();
 
-      alert("Data was updated from the server.");
+      alert("Quotes synced with server!");
     }
   } catch (error) {
     console.error("Sync failed:", error);
