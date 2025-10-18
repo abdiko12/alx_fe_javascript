@@ -26,7 +26,7 @@ function populateCategories() {
   categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
-    option.innerText = cat;
+    option.textContent = cat;  // Use textContent here!
     filter.appendChild(option);
   });
 
@@ -45,7 +45,8 @@ function showRandomQuote() {
     : quotes.filter(q => q.category === selectedCategory);
 
   if (filteredQuotes.length === 0) {
-    document.getElementById("quoteDisplay").innerText = "No quotes available in this category.";
+    // Use textContent instead of innerText/innerHTML here
+    document.getElementById("quoteDisplay").textContent = "No quotes available in this category.";
     return;
   }
 
@@ -78,7 +79,7 @@ function createAddQuoteForm() {
   inputCategory.placeholder = "Enter quote category";
 
   const addButton = document.createElement("button");
-  addButton.innerText = "Add Quote";
+  addButton.textContent = "Add Quote"; // Use textContent here!
   addButton.onclick = addQuote;
 
   formContainer.appendChild(inputText);
